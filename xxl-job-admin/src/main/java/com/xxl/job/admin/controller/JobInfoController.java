@@ -1,11 +1,13 @@
 package com.xxl.job.admin.controller;
 
-import com.xxl.job.admin.core.enums.ExecutorFailStrategyEnum;
 import com.xxl.job.admin.core.model.XxlJobGroup;
 import com.xxl.job.admin.core.model.XxlJobInfo;
 import com.xxl.job.admin.core.route.ExecutorRouteStrategyEnum;
-import com.xxl.job.admin.dao.IXxlJobGroupDao;
-import com.xxl.job.admin.service.IXxlJobService;
+import com.xxl.job.admin.core.thread.JobTriggerPoolHelper;
+import com.xxl.job.admin.core.trigger.TriggerTypeEnum;
+import com.xxl.job.admin.core.util.I18nUtil;
+import com.xxl.job.admin.dao.XxlJobGroupDao;
+import com.xxl.job.admin.service.XxlJobService;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.enums.ExecutorBlockStrategyEnum;
 import com.xxl.job.core.glue.GlueTypeEnum;
@@ -28,22 +30,23 @@ import java.util.Map;
 public class JobInfoController {
 
 	@Resource
-	private IXxlJobGroupDao xxlJobGroupDao;
+	private XxlJobGroupDao xxlJobGroupDao;
 	@Resource
-	private IXxlJobService xxlJobService;
+	private XxlJobService xxlJobService;
 	
 	@RequestMapping
-	public String index(Model model) {
+	public String index(Model model, @RequestParam(required = false, defaultValue = "-1") int jobGroup) {
 
 		// 枚举-字典
 		model.addAttribute("ExecutorRouteStrategyEnum", ExecutorRouteStrategyEnum.values());	// 路由策略-列表
 		model.addAttribute("GlueTypeEnum", GlueTypeEnum.values());								// Glue类型-字典
 		model.addAttribute("ExecutorBlockStrategyEnum", ExecutorBlockStrategyEnum.values());	// 阻塞处理策略-字典
-		model.addAttribute("ExecutorFailStrategyEnum", ExecutorFailStrategyEnum.values());		// 失败处理策略-字典
 
 		// 任务组
 		List<XxlJobGroup> jobGroupList =  xxlJobGroupDao.findAll();
 		model.addAttribute("JobGroupList", jobGroupList);
+		model.addAttribute("jobGroup", jobGroup);
+
 		return "jobinfo/jobinfo.index";
 	}
 	
@@ -51,9 +54,9 @@ public class JobInfoController {
 	@ResponseBody
 	public Map<String, Object> pageList(@RequestParam(required = false, defaultValue = "0") int start,  
 			@RequestParam(required = false, defaultValue = "10") int length,
-			int jobGroup, String executorHandler, String filterTime) {
+			int jobGroup, String jobDesc, String executorHandler, String filterTime) {
 		
-		return xxlJobService.pageList(start, length, jobGroup, executorHandler, filterTime);
+		return xxlJobService.pageList(start, length, jobGroup, jobDesc, executorHandler, filterTime);
 	}
 	
 	@RequestMapping("/add")
@@ -62,10 +65,10 @@ public class JobInfoController {
 		return xxlJobService.add(jobInfo);
 	}
 	
-	@RequestMapping("/reschedule")
+	@RequestMapping("/update")
 	@ResponseBody
-	public ReturnT<String> reschedule(XxlJobInfo jobInfo) {
-		return xxlJobService.reschedule(jobInfo);
+	public ReturnT<String> update(XxlJobInfo jobInfo) {
+		return xxlJobService.update(jobInfo);
 	}
 	
 	@RequestMapping("/remove")
@@ -89,7 +92,8 @@ public class JobInfoController {
 	@RequestMapping("/trigger")
 	@ResponseBody
 	public ReturnT<String> triggerJob(int id) {
-		return xxlJobService.triggerJob(id);
+		JobTriggerPoolHelper.trigger(id, -1, TriggerTypeEnum.MANUAL);
+		return ReturnT.SUCCESS;
 	}
 	
 }

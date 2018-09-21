@@ -19,11 +19,17 @@ public class JettyClient {
 			// serialize request
 			byte[] requestBytes = HessianSerializer.serialize(request);
 
+			// reqURL
+			String reqURL = request.getServerAddress();
+			if (reqURL!=null && reqURL.toLowerCase().indexOf("http")==-1) {
+				reqURL = "http://" + request.getServerAddress() + "/";	// IP:PORT, need parse to url
+			}
+
 			// remote invoke
-			byte[] responseBytes = HttpClientUtil.postRequest("http://" + request.getServerAddress() + "/", requestBytes);
+			byte[] responseBytes = HttpClientUtil.postRequest(reqURL, requestBytes);
 			if (responseBytes == null || responseBytes.length==0) {
 				RpcResponse rpcResponse = new RpcResponse();
-				rpcResponse.setError("RpcResponse byte[] is null");
+				rpcResponse.setError("Network request fail, RpcResponse byte[] is null");
 				return rpcResponse;
             }
 
@@ -34,7 +40,7 @@ public class JettyClient {
 			logger.error(e.getMessage(), e);
 
 			RpcResponse rpcResponse = new RpcResponse();
-			rpcResponse.setError("Client-error:" + e.getMessage());
+			rpcResponse.setError("Network request error: " + e.getMessage());
 			return rpcResponse;
 		}
 	}

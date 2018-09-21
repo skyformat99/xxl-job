@@ -2,23 +2,24 @@ $(function(){
 
 	// logout
 	$("#logoutBtn").click(function(){
-		layer.confirm('确认注销登录?', {icon: 3, title:'系统提示'}, function(index){
+		layer.confirm( I18n.logout_confirm , {
+			icon: 3,
+			title: I18n.system_tips ,
+            btn: [ I18n.system_ok, I18n.system_cancel ]
+		}, function(index){
 			layer.close(index);
 
 			$.post(base_url + "/logout", function(data, status) {
 				if (data.code == "200") {
-					layer.open({
-						title: '系统提示',
-						content: '注销成功',
-						icon: '1',
-						end: function(layero, index){
-							window.location.href = base_url + "/";
-						}
-					});
+                    layer.msg( I18n.logout_success );
+                    setTimeout(function(){
+                        window.location.href = base_url + "/";
+                    }, 500);
 				} else {
 					layer.open({
-						title: '系统提示',
-						content: (data.msg || "操作失败"),
+						title: I18n.system_tips ,
+                        btn: [ I18n.system_ok ],
+						content: (data.msg || I18n.logout_fail),
 						icon: '2'
 					});
 				}
@@ -64,26 +65,27 @@ $(function(){
 		}
 	});
 	$(slideToTop).click(function () {
-		$("body").animate({
+		$("html,body").animate({		// firefox ie not support body, chrome support body. but found that new version chrome not support body too.
 			scrollTop: 0
 		}, 100);
 	});
 
-	// 左侧菜单状态，js + 后端 + cookie方式（新）
+	// left menu status v: js + server + cookie
 	$('.sidebar-toggle').click(function(){
-		var adminlte_settings = $.cookie('adminlte_settings');	// 左侧菜单展开状态[adminlte_settings]：on=展开，off=折叠
-		if ('off' == adminlte_settings) {
-			adminlte_settings = 'on';
+		var xxljob_adminlte_settings = $.cookie('xxljob_adminlte_settings');	// on=open，off=close
+		if ('off' == xxljob_adminlte_settings) {
+            xxljob_adminlte_settings = 'on';
 		} else {
-			adminlte_settings = 'off';
+            xxljob_adminlte_settings = 'off';
 		}
-		$.cookie('adminlte_settings', adminlte_settings, { expires: 7 });	//$.cookie('the_cookie', '', { expires: -1 });
+		$.cookie('xxljob_adminlte_settings', xxljob_adminlte_settings, { expires: 7 });	//$.cookie('the_cookie', '', { expires: -1 });
 	});
-	// 左侧菜单状态，js + cookie方式（遗弃）
+
+	// left menu status v1: js + cookie
 	/*
-	 var adminlte_settings = $.cookie('adminlte_settings');
-	 if (adminlte_settings == 'off') {
-	 $('body').addClass('sidebar-collapse');
+	 var xxljob_adminlte_settings = $.cookie('xxljob_adminlte_settings');
+	 if (xxljob_adminlte_settings == 'off') {
+	 	$('body').addClass('sidebar-collapse');
 	 }
 	 */
 	

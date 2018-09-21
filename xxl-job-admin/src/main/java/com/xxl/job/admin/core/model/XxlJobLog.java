@@ -14,13 +14,11 @@ public class XxlJobLog {
 	private int jobGroup;
 	private int jobId;
 
-	// glueType
-	private String glueType;
-
 	// execute info
 	private String executorAddress;
 	private String executorHandler;
 	private String executorParam;
+	private int executorFailRetryCount;
 	
 	// trigger info
 	private Date triggerTime;
@@ -56,14 +54,6 @@ public class XxlJobLog {
 		this.jobId = jobId;
 	}
 
-	public String getGlueType() {
-		return glueType;
-	}
-
-	public void setGlueType(String glueType) {
-		this.glueType = glueType;
-	}
-
 	public String getExecutorAddress() {
 		return executorAddress;
 	}
@@ -88,6 +78,14 @@ public class XxlJobLog {
 		this.executorParam = executorParam;
 	}
 
+	public int getExecutorFailRetryCount() {
+		return executorFailRetryCount;
+	}
+
+	public void setExecutorFailRetryCount(int executorFailRetryCount) {
+		this.executorFailRetryCount = executorFailRetryCount;
+	}
+
 	public Date getTriggerTime() {
 		return triggerTime;
 	}
@@ -109,6 +107,10 @@ public class XxlJobLog {
 	}
 
 	public void setTriggerMsg(String triggerMsg) {
+		// plugin
+		if (triggerMsg!=null && triggerMsg.length()>2000) {
+			triggerMsg = triggerMsg.substring(0, 2000);
+		}
 		this.triggerMsg = triggerMsg;
 	}
 
@@ -133,6 +135,10 @@ public class XxlJobLog {
 	}
 
 	public void setHandleMsg(String handleMsg) {
+		// plugin
+		if (handleMsg!=null && handleMsg.length()>2000) {
+			handleMsg = handleMsg.substring(0, 2000);
+		}
 		this.handleMsg = handleMsg;
 	}
 }

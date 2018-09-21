@@ -26,11 +26,13 @@ public class HttpClientUtil {
 	/**
 	 * post request
 	 */
-	public static byte[] postRequest(String reqURL, byte[] date) throws Exception {
+	public static byte[] postRequest(String reqURL, byte[] data) throws Exception {
 		byte[] responseBytes = null;
 		
 		HttpPost httpPost = new HttpPost(reqURL);
-		CloseableHttpClient httpClient = HttpClients.createDefault();
+		//CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpClient httpClient = HttpClients.custom().disableAutomaticRetries().build();	// disable retry
+
 		try {
 			// init post
 			/*if (params != null && !params.isEmpty()) {
@@ -51,8 +53,8 @@ public class HttpClientUtil {
 			httpPost.setConfig(requestConfig);
 
 			// data
-			if (date != null) {
-				httpPost.setEntity(new ByteArrayEntity(date, ContentType.DEFAULT_BINARY));
+			if (data != null) {
+				httpPost.setEntity(new ByteArrayEntity(data, ContentType.DEFAULT_BINARY));
 			}
 			// do post
 			HttpResponse response = httpClient.execute(httpPost);
@@ -62,14 +64,13 @@ public class HttpClientUtil {
 				EntityUtils.consume(entity);
 			}
 		} catch (Exception e) {
-			logger.error("", e);
 			throw e;
 		} finally {
 			httpPost.releaseConnection();
 			try {
 				httpClient.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		}
 		return responseBytes;
@@ -99,7 +100,7 @@ public class HttpClientUtil {
 				}
 				return message;
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 				throw e;
 			}
 		}
